@@ -678,6 +678,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: RightHandSynthetic
       objectReference: {fileID: 0}
+    - target: {fileID: 7716747580197146831, guid: 94313e563929cb3499e3989be338a213,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8961047545368350121, guid: 94313e563929cb3499e3989be338a213,
         type: 3}
       propertyPath: m_IsActive
@@ -2186,6 +2191,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: LeftHandSynthetic
+      objectReference: {fileID: 0}
+    - target: {fileID: 336358375985414314, guid: e7fbb376593cff24f9db4ecf8d465aaf,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 336358375985414315, guid: e7fbb376593cff24f9db4ecf8d465aaf,
         type: 3}
@@ -5155,6 +5165,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 707412844487286461, guid: 5cbb2daf751a4d043a07ec95061ce85a,
         type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 707412844487286461, guid: 5cbb2daf751a4d043a07ec95061ce85a,
+        type: 3}
       propertyPath: _localPlayer.head
       value: 
       objectReference: {fileID: 956217950}
@@ -5173,11 +5188,11 @@ PrefabInstance:
         type: 3}
       propertyPath: _localPlayer.leftHand
       value: 
-      objectReference: {fileID: 2116185186}
+      objectReference: {fileID: 2046879354}
     - target: {fileID: 707412844487286461, guid: 5cbb2daf751a4d043a07ec95061ce85a,
         type: 3}
       propertyPath: _localPlayer.rightHand
       value: 
-      objectReference: {fileID: 99054057}
+      objectReference: {fileID: 1944252269}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5cbb2daf751a4d043a07ec95061ce85a, type: 3}
