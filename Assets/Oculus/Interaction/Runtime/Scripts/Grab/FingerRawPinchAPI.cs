@@ -15,6 +15,11 @@ using UnityEngine;
 
 namespace Oculus.Interaction.GrabAPI
 {
+    /// <summary>
+    /// This FingerAPI uses the the Pinch value as it comes from the Hand data to detect
+    /// if they are grabbing. It is specially useful with Controllers As Hands since this
+    /// value is directly driven by the trigger presses.
+    /// </summary>
     public class FingerRawPinchAPI : IFingerAPI
     {
         private class FingerPinchData
@@ -98,7 +103,7 @@ namespace Oculus.Interaction.GrabAPI
                    _fingersPinchData[(int)finger].IsPinching == targetPinchState;
         }
 
-        public float GetFingerGrabStrength(HandFinger finger)
+        public float GetFingerGrabScore(HandFinger finger)
         {
             return _fingersPinchData[(int)finger].PinchStrength;
         }

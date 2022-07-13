@@ -16,11 +16,15 @@ using UnityEngine.Assertions;
 
 namespace Oculus.Interaction.GrabAPI
 {
+    /// <summary>
+    /// The HandGrabAPI wraps under the hood several IFingerAPIs to detect if
+    /// the fingers are grabbing or not. It differentiates between pinch and
+    /// palm grabs but via Inject it is possible to modify the detectors.
+    /// </summary>
     public class HandGrabAPI : MonoBehaviour
     {
         [SerializeField, Interface(typeof(IHand))]
         private MonoBehaviour _hand;
-
         public IHand Hand { get; private set; }
 
         private IFingerAPI _fingerPinchGrabAPI = new FingerPinchGrabAPI();
@@ -170,7 +174,7 @@ namespace Oculus.Interaction.GrabAPI
         private bool IsHandSelectFingersChanged(in GrabbingRule fingers, IFingerAPI fingerAPI)
         {
             bool selectsWithOptionals = fingers.SelectsWithOptionals;
-            bool aFingerGrabbed = false;
+            bool anyFingerBeganGrabbing = false;
 
             for (int i = 0; i < Constants.NUM_FINGERS; i++)
             {
@@ -184,7 +188,7 @@ namespace Oculus.Interaction.GrabAPI
 
                     if (fingerAPI.GetFingerIsGrabbingChanged(finger, true))
                     {
-                        aFingerGrabbed = true;
+                        anyFingerBeganGrabbing = true;
                     }
                 }
                 else if (selectsWithOptionals
@@ -197,13 +201,13 @@ namespace Oculus.Interaction.GrabAPI
                 }
             }
 
-            return aFingerGrabbed;
+            return anyFingerBeganGrabbing;
         }
 
         private bool IsHandUnselectFingersChanged(in GrabbingRule fingers, IFingerAPI fingerAPI)
         {
             bool isAnyFingerGrabbing = false;
-            bool aFingerUngrabbed = false;
+            bool anyFingerStoppedGrabbing = false;
             bool selectsWithOptionals = fingers.SelectsWithOptionals;
             for (int i = 0; i < Constants.NUM_FINGERS; i++)
             {
@@ -218,19 +222,18 @@ namespace Oculus.Interaction.GrabAPI
                 {
                     if (fingerAPI.GetFingerIsGrabbingChanged(finger, false))
                     {
-                        aFingerUngrabbed = true;
+                        anyFingerStoppedGrabbing = true;
                         if (fingers.UnselectMode == FingerUnselectMode.AnyReleased)
                         {
                             return true;
                         }
                     }
                 }
-
-                if (fingers[finger] == FingerRequirement.Optional)
+                else if (fingers[finger] == FingerRequirement.Optional)
                 {
                     if (fingerAPI.GetFingerIsGrabbingChanged(finger, false))
                     {
-                        aFingerUngrabbed = true;
+                        anyFingerStoppedGrabbing = true;
                         if (fingers.UnselectMode == FingerUnselectMode.AnyReleased
                             && selectsWithOptionals)
                         {
@@ -240,7 +243,7 @@ namespace Oculus.Interaction.GrabAPI
                 }
             }
 
-            return !isAnyFingerGrabbing && aFingerUngrabbed;
+            return !isAnyFingerGrabbing && anyFingerStoppedGrabbing;
         }
 
         public Vector3 GetPinchCenter()
@@ -263,29 +266,29 @@ namespace Oculus.Interaction.GrabAPI
             return wristPose.position + wristPose.rotation * offset;
         }
 
-        public float GetHandPinchStrength(in GrabbingRule fingers,
+        public float GetHandPinchScore(in GrabbingRule fingers,
             bool includePinching = true)
         {
-            return GetHandStrength(fingers, includePinching, _fingerPinchGrabAPI);
+            return GetHandGrabScore(fingers, includePinching, _fingerPinchGrabAPI);
         }
 
-        public float GetHandPalmStrength(in GrabbingRule fingers,
+        public float GetHandPalmScore(in GrabbingRule fingers,
             bool includeGrabbing = true)
         {
-            return GetHandStrength(fingers, includeGrabbing, _fingerPalmGrabAPI);
+            return GetHandGrabScore(fingers, includeGrabbing, _fingerPalmGrabAPI);
         }
 
         public float GetFingerPinchStrength(HandFinger finger)
         {
-            return _fingerPinchGrabAPI.GetFingerGrabStrength(finger);
+            return _fingerPinchGrabAPI.GetFingerGrabScore(finger);
         }
 
         public float GetFingerPalmStrength(HandFinger finger)
         {
-            return _fingerPalmGrabAPI.GetFingerGrabStrength(finger);
+            return _fingerPalmGrabAPI.GetFingerGrabScore(finger);
         }
 
-        private float GetHandStrength(in GrabbingRule fingers,
+        private float GetHandGrabScore(in GrabbingRule fingers,
             bool includeGrabbing, IFingerAPI fingerAPI)
         {
             float requiredMin = 1.0f;
@@ -306,12 +309,11 @@ namespace Oculus.Interaction.GrabAPI
 
                 if (fingers[finger] == FingerRequirement.Optional)
                 {
-                    optionalMax = Mathf.Max(optionalMax, fingerAPI.GetFingerGrabStrength(finger));
+                    optionalMax = Mathf.Max(optionalMax, fingerAPI.GetFingerGrabScore(finger));
                 }
-
-                if (fingers[finger] == FingerRequirement.Required)
+                else if (fingers[finger] == FingerRequirement.Required)
                 {
-                    requiredMin = Mathf.Min(requiredMin, fingerAPI.GetFingerGrabStrength(finger));
+                    requiredMin = Mathf.Min(requiredMin, fingerAPI.GetFingerGrabScore(finger));
                 }
             }
 

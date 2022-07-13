@@ -19,9 +19,9 @@ namespace Oculus.Interaction
 {
     public class GrabStrengthIndicator : MonoBehaviour
     {
-        [SerializeField, Interface(typeof(IHandGrabInteractor), typeof(IInteractor))]
+        [SerializeField, Interface(typeof(IHandGrabber), typeof(IInteractor))]
         private MonoBehaviour _handGrabInteractor;
-        private IHandGrabInteractor HandGrab { get; set; }
+        private IHandGrabber HandGrab { get; set; }
         private IInteractor Interactor { get; set; }
 
         [SerializeField]
@@ -30,12 +30,14 @@ namespace Oculus.Interaction
         [SerializeField]
         private float _glowLerpSpeed = 2f;
         [SerializeField]
-        private float _glowColorLerpSpeed = 0.2f;
+        private float _glowColorLerpSpeed = 2f;
 
         [SerializeField]
         private Color _fingerGlowColorWithInteractable;
         [SerializeField]
         private Color _fingerGlowColorWithNoInteractable;
+        [SerializeField]
+        private Color _fingerGlowColorHover;
 
         #region public properties
         public float GlowLerpSpeed
@@ -86,7 +88,19 @@ namespace Oculus.Interaction
                 _fingerGlowColorWithNoInteractable = value;
             }
         }
-#endregion
+
+        public Color FingerGlowColorHover
+        {
+            get
+            {
+                return _fingerGlowColorHover;
+            }
+            set
+            {
+                _fingerGlowColorHover = value;
+            }
+        }
+        #endregion
 
         private readonly int[] _handShaderGlowPropertyIds = new int[]
         {
@@ -105,7 +119,7 @@ namespace Oculus.Interaction
 
         private void Awake()
         {
-            HandGrab = _handGrabInteractor as IHandGrabInteractor;
+            HandGrab = _handGrabInteractor as IHandGrabber;
             Interactor = _handGrabInteractor as IInteractor;
         }
 
@@ -124,7 +138,7 @@ namespace Oculus.Interaction
         {
             if (_started)
             {
-                Interactor.WhenInteractorUpdated += UpdateVisual;
+                Interactor.WhenPostprocessed += UpdateVisual;
                 _currentGlowColor = _fingerGlowColorWithNoInteractable;
             }
         }
@@ -133,7 +147,7 @@ namespace Oculus.Interaction
         {
             if (_started)
             {
-                Interactor.WhenInteractorUpdated -= UpdateVisual;
+                Interactor.WhenPostprocessed -= UpdateVisual;
             }
         }
 
@@ -143,9 +157,13 @@ namespace Oculus.Interaction
             bool isSelectingInteractable = Interactor.HasSelectedInteractable;
             bool hasHoverTarget = Interactor.HasCandidate;
 
-            Color desiredGlowColor = isSelectingInteractable
-                ? _fingerGlowColorWithInteractable
-                : _fingerGlowColorWithNoInteractable;
+            Color desiredGlowColor = _fingerGlowColorHover;
+            if (isSelecting)
+            {
+                desiredGlowColor = isSelectingInteractable
+                    ? _fingerGlowColorWithInteractable
+                    : _fingerGlowColorWithNoInteractable;
+            }
 
             _currentGlowColor = Color.Lerp(_currentGlowColor, desiredGlowColor,
                 Time.deltaTime * _glowColorLerpSpeed);
@@ -193,7 +211,7 @@ namespace Oculus.Interaction
 
         #region Inject
 
-        public void InjectAllGrabStrengthIndicator(IHandGrabInteractor handGrab, IInteractor interactor,
+        public void InjectAllGrabStrengthIndicator(IHandGrabber handGrab, IInteractor interactor,
             MaterialPropertyBlockEditor handMaterialPropertyBlockEditor)
         {
             InjectHandGrab(handGrab);
@@ -201,7 +219,7 @@ namespace Oculus.Interaction
             InjectHandMaterialPropertyBlockEditor(handMaterialPropertyBlockEditor);
         }
 
-        public void InjectHandGrab(IHandGrabInteractor handGrab)
+        public void InjectHandGrab(IHandGrabber handGrab)
         {
             HandGrab = handGrab;
         }

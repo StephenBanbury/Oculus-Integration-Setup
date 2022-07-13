@@ -25,28 +25,19 @@ namespace Oculus.Voice.Utility
     public static class VoiceSDKMenu
     {
         #region WINDOWS
-        private static void Init()
-        {
-            WitWindowUtility.setupWindowType = typeof(WelcomeWizard);
-            WitWindowUtility.configurationWindowType = typeof(SettingsWindow);
-            WitWindowUtility.understandingWindowType = typeof(UnderstandingViewerWindow);
-        }
         [MenuItem("Oculus/Voice SDK/Settings", false, 100)]
         private static void OpenConfigurationWindow()
         {
-            Init();
             WitWindowUtility.OpenConfigurationWindow();
         }
         [MenuItem("Oculus/Voice SDK/Understanding Viewer", false, 100)]
         private static void OpenUnderstandingWindow()
         {
-            Init();
             WitWindowUtility.OpenUnderstandingWindow();
         }
         [MenuItem("Oculus/Voice SDK/About", false, 200)]
         private static void OpenAboutWindow()
         {
-            Init();
             ScriptableWizard.DisplayWizard<AboutWindow>(VoiceSDKStyles.Texts.AboutTitleLabel, VoiceSDKStyles.Texts.AboutCloseLabel);
         }
         #endregion
@@ -55,27 +46,50 @@ namespace Oculus.Voice.Utility
         [CustomPropertyDrawer(typeof(WitEndpointConfig))]
         public class VoiceCustomEndpointPropertyDrawer : WitEndpointConfigDrawer
         {
-            
+
         }
         [CustomPropertyDrawer(typeof(WitApplication))]
         public class VoiceCustomApplicationPropertyDrawer : VoiceApplicationDetailProvider
         {
-            
+
         }
         [CustomPropertyDrawer(typeof(WitIntent))]
         public class VoiceCustomIntentPropertyDrawer : WitIntentPropertyDrawer
         {
-            
+
         }
         [CustomPropertyDrawer(typeof(WitEntity))]
         public class VoiceCustomEntityPropertyDrawer : WitEntityPropertyDrawer
         {
-            
+
         }
         [CustomPropertyDrawer(typeof(WitTrait))]
         public class VoiceCustomTraitPropertyDrawer : WitTraitPropertyDrawer
         {
-            
+
+        }
+        #endregion
+
+        #region Scriptable Objects
+        [MenuItem("Assets/Create/Voice SDK/Dynamic Entities")]
+        public static void CreateDynamicEntities()
+        {
+            WitDynamicEntitiesData asset =
+                ScriptableObject.CreateInstance<WitDynamicEntitiesData>();
+
+            var path = EditorUtility.SaveFilePanel("Save Dynamic Entity", Application.dataPath,
+                "DynamicEntities", "asset");
+
+            if (!string.IsNullOrEmpty(path))
+            {
+                path = "Assets/" + path.Replace(Application.dataPath, "");
+                AssetDatabase.CreateAsset(asset, path);
+                AssetDatabase.SaveAssets();
+
+                EditorUtility.FocusProjectWindow();
+
+                Selection.activeObject = asset;
+            }
         }
         #endregion
     }
